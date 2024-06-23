@@ -20,6 +20,8 @@
 #include "WidgetUtilsGtk.h"
 #include "nsGtkKeyUtils.h"
 
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 namespace mozilla::widget {
 
 static nsWaylandDisplay* gWaylandDisplay;
@@ -150,8 +152,9 @@ static void global_registry_handler(void* data, wl_registry* registry,
             registry, id, &xdg_dbus_annotation_manager_v1_interface, 1);
     display->SetXdgDbusAnnotationManager(annotationManager);
   } else if (iface.EqualsLiteral("wl_seat")) {
+    // Requested wl_seat version 8 as we want wl_pointer_listener.axis_value120 if available.
     auto* seat =
-        WaylandRegistryBind<wl_seat>(registry, id, &wl_seat_interface, 1);
+        WaylandRegistryBind<wl_seat>(registry, id, &wl_seat_interface, MIN(version, 8);
     KeymapWrapper::SetSeat(seat, id);
   } else if (iface.EqualsLiteral("wp_fractional_scale_manager_v1")) {
     auto* manager = WaylandRegistryBind<wp_fractional_scale_manager_v1>(
